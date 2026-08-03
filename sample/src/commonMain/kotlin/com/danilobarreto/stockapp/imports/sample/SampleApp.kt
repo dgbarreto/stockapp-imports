@@ -16,6 +16,10 @@ import com.danilobarreto.stockapp.auth.data.TokenStorage
 import com.danilobarreto.stockapp.auth.presentation.LoginScreen
 import com.danilobarreto.stockapp.auth.presentation.LoginViewModel
 import com.danilobarreto.stockapp.designsystem.theme.StockAppTheme
+import com.danilobarreto.stockapp.imports.data.ImportApiClient
+import com.danilobarreto.stockapp.imports.data.ImportRepositoryImpl
+import com.danilobarreto.stockapp.imports.presentation.ImportScreen
+import com.danilobarreto.stockapp.imports.presentation.ImportViewModel
 
 // Sample isolado do módulo imports: só valida login (via auth) + build da árvore de módulos.
 // Ainda não existe domain/data/presentation de importação de ordens aqui - assim que isso for
@@ -28,15 +32,21 @@ fun SampleApp() {
     val authRepository = remember {
         AuthRepositoryImpl(AuthApiClient(httpClient, sampleBaseUrl()), tokenStorage)
     }
+    val importRepository = remember {
+        ImportRepositoryImpl(ImportApiClient(httpClient, sampleBaseUrl()))
+    }
+
     val loginViewModel = remember { LoginViewModel(authRepository) }
+    val importViewModel = remember { ImportViewModel(importRepository) }
 
     val isLoggedIn by authRepository.isLoggedIn.collectAsState()
 
     StockAppTheme {
         if (isLoggedIn) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Imports — em construção", style = MaterialTheme.typography.titleMedium)
-            }
+            ImportScreen(
+                viewModel = importViewModel,
+                onBack = {}
+            )
         } else {
             LoginScreen(
                 viewModel = loginViewModel,
