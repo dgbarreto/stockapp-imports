@@ -38,16 +38,8 @@ publishing {
 kotlin {
     jvm("desktop")
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "Imports"
-            isStatic = true
-            freeCompilerArgs += listOf("-Xbinary=bundleId=com.danilobarreto.stockapp.imports")
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
 
     androidLibrary {
        namespace = "com.danilobarreto.stockapp.imports"
