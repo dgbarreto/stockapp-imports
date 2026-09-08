@@ -7,7 +7,17 @@ data class ImportResultDto(
     val importBatchId: String,
     val totalRows: Int,
     val created: Int,
+    val createdRows: List<CreatedImportRowDto> = emptyList(),
     val skipped: List<SkippedImportRowDto>,
+)
+
+@Serializable
+data class CreatedImportRowDto(
+    val row: Int,
+    val ticker: String,
+    val side: String,
+    val quantity: Int,
+    val price: Double,
 )
 
 @Serializable

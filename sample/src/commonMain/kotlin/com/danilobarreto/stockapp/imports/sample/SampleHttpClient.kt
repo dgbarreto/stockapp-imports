@@ -20,6 +20,10 @@ fun createSampleHttpClient(tokenStorage: TokenStorage): HttpClient =
                 loadTokens {
                     tokenStorage.read()?.let { BearerTokens(it, refreshToken = "") }
                 }
+                // Sem isso, o Ktor só manda o token depois de já ter tomado um 401 (reativo).
+                // Funciona pra GET simples, mas quebra em upload multipart (import de extrato) -
+                // manda o token de cara pra não depender de repetir a requisição com o corpo.
+                sendWithoutRequest { true }
             }
         }
     }

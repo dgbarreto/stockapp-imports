@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.danilobarreto.stockapp.auth.data.AuthApiClient
@@ -20,6 +21,7 @@ import com.danilobarreto.stockapp.imports.data.ImportApiClient
 import com.danilobarreto.stockapp.imports.data.ImportRepositoryImpl
 import com.danilobarreto.stockapp.imports.presentation.ImportScreen
 import com.danilobarreto.stockapp.imports.presentation.ImportViewModel
+import kotlinx.coroutines.launch
 
 // Sample isolado do módulo imports: só valida login (via auth) + build da árvore de módulos.
 // Ainda não existe domain/data/presentation de importação de ordens aqui - assim que isso for
@@ -28,6 +30,7 @@ import com.danilobarreto.stockapp.imports.presentation.ImportViewModel
 fun SampleApp() {
     val tokenStorage = remember { TokenStorage() }
     val httpClient = remember { createSampleHttpClient(tokenStorage) }
+    val coroutineScope = rememberCoroutineScope()
 
     val authRepository = remember {
         AuthRepositoryImpl(AuthApiClient(httpClient, sampleBaseUrl()), tokenStorage)
@@ -41,11 +44,17 @@ fun SampleApp() {
 
     val isLoggedIn by authRepository.isLoggedIn.collectAsState()
 
+    // Sample não tem "carteira" de verdade - voltar ou "ver carteira" aqui só serve pra
+    // encerrar a sessão (limpa o token) e te devolver pro LoginScreen, assim dá pra logar
+    // de novo com um token fresco sempre que precisar testar o fluxo.
+    val backToLogin: () -> Unit = { coroutineScope.launch { authRepository.logout() } }
+
     StockAppTheme {
         if (isLoggedIn) {
             ImportScreen(
                 viewModel = importViewModel,
-                onBack = {}
+                onBack = backToLogin,
+                onViewCarteira = backToLogin,
             )
         } else {
             LoginScreen(
